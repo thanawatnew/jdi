@@ -1,0 +1,28 @@
+{
+  "name": "jdi",
+  "version": "1.0.0",
+  "description": "Online text pasting system using Node.js",
+  "main": "Server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thanawatnew/jdi"
+  },
+  "keywords": [
+    "Node.js",
+    "mongoDb"
+  ],
+  "author": "thanawatnew",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thanawatnew/jdi/issues"
+  },
+  "homepage": "https://github.com/thanawatnew/jdi",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "express": "^4.13.3",
+    "mongoose": "^4.1.2"
+  }
+}
