@@ -27,17 +27,50 @@ router.route("/edit")
 	})
 	.post(function(request,response){
 		//TODO: add data and show the status to the user
+		
 		var tempNote = request.body;
+		
 		var newNote = new Note({
 			link : tempNote.link,
 			detail : tempNote.detail,
 			userEmail : tempNote.userEmail
 		});
-		newNote.save(function(err) {
-			if (err) throw err;
-			//console.log('words saved!');
-			response.send('note saved!');
+		
+		// Setup stuff
+		var query = { link: tempNote.link },
+			update = { expire: new Date() },
+			options = { upsert: false };
+
+		// Find the document
+		Note.findOneAndUpdate(query, update, options, function(error, result) {
+			if (!error) {
+				// If the document doesn't exist
+				if (!result) {
+					// Create it
+					//newNote = new Note();
+					// Save the document
+					newNote.save(function(error) {
+						if (!error) {
+							// Do something with the document
+							response.send('note saved!');
+						} else {
+							throw error;
+							console.log(err.message);
+							return next(err);
+						}
+					});
+					
+				}
+				else{
+					response.send('note already existed!');
+				}
+				
+				
+			}
+			
 		});
+		
+		
 		//response.send(noteOp.note.insert(request));
 	});
 
