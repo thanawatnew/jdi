@@ -1,3 +1,4 @@
+var config = require('./configs/env')
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var flash = require('express-flash');
@@ -8,6 +9,7 @@ var router      =   express.Router();
 var Note     =   require("./models/note");
 
 var app         =   express();
+
 
 var sessionStore = new session.MemoryStore;
 
@@ -134,5 +136,5 @@ app.get('/:link', function(req, res) {
 
 
 
-app.listen(3000);
-console.log("Listening to PORT 3000");
+app.listen(config.port);
+console.log("Listening to PORT "+config.port);
