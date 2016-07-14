@@ -1,0 +1,16 @@
+doctype html
+html
+	head
+		title edit
+	body
+		form(action="/edit",method="post")
+			label(for='userEmail') userEmail
+				input(id='userEmail',type='text',value='',name='userEmail')
+				<br>
+			label(for='detail') detail
+				textarea(id='detail',value='',name='detail')
+				<br>
+			label(for='link') link > 7 digit
+				input(id='link',type='text',value='',name='link')
+				<br>
+			input(type='submit',value='submit',data-transition='fade', data-theme='c')
