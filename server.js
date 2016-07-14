@@ -4,11 +4,14 @@ var session = require('express-session');
 var passport = require('passport');
 
 var Note     =   require("./models/note");
+
+
 var User     =   require("./models/user");
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
 });
+
 passport.deserializeUser(function(id, done) {
         User.findOne(
             {_id: id},
@@ -18,7 +21,7 @@ passport.deserializeUser(function(id, done) {
             }
         );
 });
-
+//*/
 
 	
 //use this code before any route definitions
@@ -32,6 +35,7 @@ var handlebars = require('express-handlebars')
 var bodyParser  =   require("body-parser");
 var router      =   express.Router();
 require('./configs/strategies/facebook.js')();
+require('./configs/strategies/google.js')();
 var sessionStore = new session.MemoryStore;
 
 // View Engines
@@ -43,7 +47,7 @@ app.use(session({
     store: sessionStore,
     saveUninitialized: true,
     resave: 'true',
-    secret: 'ANYTHINGalsjkdflksajdf'
+    secret: 'secret'
 }));
 app.use(flash());
 
@@ -64,6 +68,7 @@ app.use(express.static(__dirname + '/assets'));
 //Store all JS and CSS in Scripts folder.
 
 
+//facebook
 router.get('/oauth/facebook', passport.authenticate('facebook', {
     failureRedirect: '/login',
     scope:['email']
@@ -75,6 +80,21 @@ router.get('/oauth/facebook/callback', passport.authenticate('facebook', {
     scope:['email']
 }));
 
+// =====================================
+// GOOGLE ROUTES =======================
+// =====================================
+// send to google to do the authentication
+// profile gets us their basic information including their name
+// email gets their emails
+app.get('/oauth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+// the callback after google has authenticated the user
+app.get('/oauth/google/callback',
+        passport.authenticate('google', {
+                successRedirect : '/login',
+                failureRedirect : '/'
+        }));
+//*/
 router.get("/",function(req,res){
     //res.json({"error" : false,"message" : "Hello World"});
 	res.redirect('/login');
