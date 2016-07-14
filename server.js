@@ -1,16 +1,37 @@
-var config = require('./configs/env')
+var express     =   require("express");
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var passport = require('passport');
+
+var Note     =   require("./models/note");
+var User     =   require("./models/user");
+
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
+});
+passport.deserializeUser(function(id, done) {
+        User.findOne(
+            {_id: id},
+            '-password',
+            function(err, user) {
+                done(err, user);
+            }
+        );
+});
+
+
+	
+//use this code before any route definitions
+var app         =   express();
+app.use(passport.initialize());
+app.use(passport.session());
+
+var config = require('./configs/env')
 var flash = require('express-flash');
 var handlebars = require('express-handlebars')
-var express     =   require("express");
 var bodyParser  =   require("body-parser");
 var router      =   express.Router();
-var Note     =   require("./models/note");
-
-var app         =   express();
-
-
+require('./configs/strategies/facebook.js')();
 var sessionStore = new session.MemoryStore;
 
 // View Engines
@@ -22,11 +43,14 @@ app.use(session({
     store: sessionStore,
     saveUninitialized: true,
     resave: 'true',
-    secret: 'secret'
+    secret: 'ANYTHINGalsjkdflksajdf'
 }));
 app.use(flash());
 
 app.use(function(req, res, next){
+	//res.locals.user = req.user || null;
+	res.locals.loggedIn = (req.user) ? true : false;
+	
     res.locals.success_messages = req.flash('success_messages');
     res.locals.error_messages = req.flash('error_messages');
     next();
@@ -39,6 +63,18 @@ app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/assets'));
 //Store all JS and CSS in Scripts folder.
 
+
+router.get('/oauth/facebook', passport.authenticate('facebook', {
+    failureRedirect: '/login',
+    scope:['email']
+}));
+
+router.get('/oauth/facebook/callback', passport.authenticate('facebook', {
+    failureRedirect: '/login',
+    successRedirect: '/',
+    scope:['email']
+}));
+
 router.get("/",function(req,res){
     //res.json({"error" : false,"message" : "Hello World"});
 	res.redirect('/login');
@@ -47,7 +83,8 @@ router.get("/",function(req,res){
 router.get("/login",function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
 	//res.sendFile(__dirname + '/views'+'/login.html');
-	res.render('login', { message: req.flash() });
+	//console.log(req.user);
+	res.render('login', { message: req.flash() ,user : req.user});
 });
 
 router.route("/edit")
