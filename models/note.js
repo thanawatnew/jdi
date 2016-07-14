@@ -1,7 +1,11 @@
-var mongoose    =   require("mongoose");
-mongoose.createConnection('mongodb://localhost:27017/jdiDb');
+//var mongoose    =   require("mongoose");
+//mongoose.connect('mongodb://localhost:27017/jdiDb');
+var config = require('../configs/env');
 
 // create instance of Schema
+
+var mongoose = config.db;
+
 var Schema =   mongoose.Schema;
 
 // create schema

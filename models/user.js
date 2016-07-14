@@ -1,6 +1,8 @@
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
-mongoose.createConnection('mongodb://localhost:27017/jdiDb');
+var config = require('..//configs/env');
+//var mongoose = require('mongoose'),
+var mongoose = config.db;
+var Schema = mongoose.Schema;
+//mongoose.createConnection('mongodb://localhost:27017/jdiDb');
 
 var UserSchema = new Schema({
     name: String,
