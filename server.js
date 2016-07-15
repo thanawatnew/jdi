@@ -22,10 +22,16 @@ passport.deserializeUser(function(id, done) {
         );
 });
 //*/
-
+var app         =   express();
+app.use(session({
+    cookie: { maxAge: 60000 },
+    store: sessionStore,
+    saveUninitialized: true,
+    resave: 'true',
+    secret: 'secret'
+}));
 	
 //use this code before any route definitions
-var app         =   express();
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -42,13 +48,7 @@ var sessionStore = new session.MemoryStore;
 app.set('view engine', 'jade');
 
 app.use(cookieParser('secret'));
-app.use(session({
-    cookie: { maxAge: 60000 },
-    store: sessionStore,
-    saveUninitialized: true,
-    resave: 'true',
-    secret: 'secret'
-}));
+
 app.use(flash());
 
 app.use(function(req, res, next){
@@ -104,6 +104,7 @@ router.get("/login",function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
 	//res.sendFile(__dirname + '/views'+'/login.html');
 	//console.log(req.user);
+	console.log(req);
 	res.render('login', { message: req.flash() ,user : req.user});
 });
 
