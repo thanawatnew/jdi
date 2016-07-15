@@ -4,8 +4,6 @@ var session = require('express-session');
 var passport = require('passport');
 
 var Note     =   require("./models/note");
-
-
 var User     =   require("./models/user");
 
 passport.serializeUser(function(user, done) {
@@ -68,6 +66,12 @@ app.use(express.static(__dirname + '/assets'));
 //Store all JS and CSS in Scripts folder.
 
 
+function randomString(length, chars) {
+    var result = '';
+    for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+}
+
 //facebook
 router.get('/oauth/facebook', passport.authenticate('facebook', {
     failureRedirect: '/login',
@@ -106,7 +110,9 @@ router.get("/login",function(req,res){
 	//console.log(req.user);
 	console.log(req.user);
 	console.log(res.locals.user);
-	res.render('login', { message: req.flash()});
+	if(typeof(req.flash()) !== 'undefined')
+		res.render('login', { message: req.flash()});
+	else res.render('login', { message: ''});
 });
 
 router.get("/logout",function(req,res){
@@ -118,54 +124,69 @@ router.get("/logout",function(req,res){
 });
 router.route("/add")
 	.get(function(req,res){
-		res.render('add', { message: req.flash() } );
+		if(!req.user){
+			req.flash('error_messages', 'please login to add a note');
+			res.redirect('/');
+		}
+		else
+			res.render('add', { message: req.flash() } );
 	})
 	.post(function(req,res){
 		//TODO: add data and show the status to the user
-		
 		var tempNote = req.body;
-		
-		var newNote = new Note({
-			link : tempNote.link,
-			detail : tempNote.detail,
-			email : tempNote.email
-		});
-		
-		// Setup stuff
-		var query = { link: tempNote.link },
-			update = { expire: new Date() },
-			options = { upsert: false };
+		tempNote.email = req.user.email;
+		var notUnique = true;
+		//while(notUnique)
+		//{
+				if(tempNote.link.length<7) 
+					tempNote.link = randomString(6, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+				console.log(tempNote.link);
+			var newNote = new Note({
+				link : tempNote.link,
+				detail : tempNote.detail,
+				email : tempNote.email
+			});
+			
+			// Setup stuff
+			var query = { link: tempNote.link },
+				update = { expire: new Date() },
+				options = { upsert: false };
 
-		// Find the document
-		Note.findOneAndUpdate(query, update, options, function(error, result) {
-			if (!error) {
-				// If the document doesn't exist
-				if (!result) {
-					// Create it
-					//newNote = new Note();
-					// Save the document
-					newNote.save(function(error) {
-						if (!error) {
-							// Do something with the document
-							res.send('note saved!');
-						} else {
-							throw error;
-							console.log(err.message);
-							return next(err);
-						}
-					});
+			// Find the document
+			Note.findOneAndUpdate(query, update, options, function(error, result) {
+				if (!error) {
+					// If the document doesn't exist
+					if (!result) {
+						// Create it
+						//newNote = new Note();
+						// Save the document
+						newNote.save(function(error) {
+							if (!error) {
+								// Do something with the document
+								//res.send('note saved!');
+								notUnique=false;
+								res.redirect('/'+tempNote.link);
+							} else {
+								throw error;
+								console.log(err.message);
+								return next(err);
+							}
+						});
+						
+					}
+					else{
+						//res.send('note already existed!');
+						req.flash('error_messages', "Woops, looks like the random link name doesn't work, please submit again");
+						//continue;
+						//res.redirect('/add');
+						res.render('add', { message: req.flash(), detail: tempNote.detail } );
+					}
+					
 					
 				}
-				else{
-					res.send('note already existed!');
-					req.flash('error_messages', 'Woops, looks like that note already existed.');
-					res.redirect('/');
-				}
 				
-				
-			}
-			
-		});
+			});
+		//}
 		
 		
 		//res.send(noteOp.note.insert(req));
@@ -173,7 +194,6 @@ router.route("/add")
 
 router.get("/edit/:link",function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
-	console.log('test2');
 	Note.findOne(
             {
                 "$or": [
@@ -229,7 +249,7 @@ app.get('/:link', function(req, res) {
 				}
 				else
 				{
-					req.flash('error', 'Woops, looks like that note doesn\'t exist.');
+					req.flash('error_messages', 'Woops, looks like that note doesn\'t exist.');
 					res.redirect('/');
 					//res.send("note not found");
 				}
