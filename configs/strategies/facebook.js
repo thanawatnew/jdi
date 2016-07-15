@@ -12,7 +12,8 @@ module.exports = function() {
         clientSecret: config.facebook.clientSecret,
         callbackURL: config.facebook.callbackURL,
 		profileFields: ['id', 'email','name'],
-        passReqToCallback: true
+        passReqToCallback: true,
+		enableProof: true
     },
     function(req, accessToken, refreshToken, profile, done) {
         var providerData = profile._json;
