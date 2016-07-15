@@ -1,0 +1,12 @@
+doctype html
+html
+	head
+		title show
+	body
+		if success_messages && success_messages.length > 0
+			p= success_messages
+		if error_messages && error_messages.length > 0
+			p= error_messages
+		p| #{note.userEmail}<br>
+		p| detail: #{note.detail}<br>
+		p| updated: #{note.updatedAt}
