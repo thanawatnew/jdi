@@ -52,7 +52,7 @@ app.use(cookieParser('secret'));
 app.use(flash());
 
 app.use(function(req, res, next){
-	//res.locals.user = req.user || null;
+	res.locals.user = req.user || null;
 	res.locals.loggedIn = (req.user) ? true : false;
 	
     res.locals.success_messages = req.flash('success_messages');
@@ -108,9 +108,15 @@ router.get("/login",function(req,res){
 	res.render('login', { message: req.flash() ,user : req.user});
 });
 
-router.route("/edit")
+router.get("/logout",function(req,res){
+	req.logout();
+    req.session.destroy();
+	req.flash('success_messages', 'logged out successfully');
+    res.redirect('/');
+});
+router.route("/add")
 	.get(function(req,res){
-		res.render('edit', { message: req.flash() } );
+		res.render('add', { message: req.flash() } );
 	})
 	.post(function(req,res){
 		//TODO: add data and show the status to the user
@@ -150,6 +156,8 @@ router.route("/edit")
 				}
 				else{
 					res.send('note already existed!');
+					req.flash('error_messages', 'Woops, looks like that note already existed.');
+					res.redirect('/');
 				}
 				
 				
@@ -161,10 +169,47 @@ router.route("/edit")
 		//res.send(noteOp.note.insert(req));
 	});
 
-router.get("/link",function(req,res){
+router.get("/edit/:link",function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
-	res.render('link', { message: req.flash() } );
-});
+	console.log('test2');
+	Note.findOne(
+            {
+                "$or": [
+                    { link: req.params.link }
+                ]
+            }, function(error, obj) {
+				if(obj)
+				{
+					console.log(obj);
+					res.render('edit', { message: req.flash(), note: obj } );
+					//res.send(obj);
+					//console.log(obj);
+				}
+				else
+				{
+					req.flash('error_messages', 'Woops, looks like that note doesn\'t exist.');
+					res.redirect('/');
+					//res.send("note not found");
+				}
+                
+            }
+        );
+	
+	})
+	.post("/edit/:link",function(req,res){
+			var conditions = { link: req.params.link };
+			var update = { $set: { link: req.body.link, detail: req.body.detail }};
+			var options = { upsert: true, 'new': true };
+
+			Note.update(conditions, update, options, function (err, data) {// callback
+				if (err) return console.error(err);
+				console.log(data);
+			});
+			console.log('test');
+			req.flash('success_messages', 'Your note was updated');
+			res.redirect('/edit/'+req.body.link);
+			//res.render('link', { message: req.flash(), note:obj } );
+		});
 
 app.use('/',router);
 
@@ -177,7 +222,8 @@ app.get('/:link', function(req, res) {
             }, function(error, obj) {
 				if(obj)
 				{
-					res.send(obj);
+					//res.send(obj);
+					res.render('show', { message: req.flash(), note: obj } );
 					console.log(obj);
 				}
 				else
