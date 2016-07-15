@@ -4,7 +4,7 @@ html
 		title link config
 	body
 		Welcome to jdi - Online text pasting system using Node.js
-		<br>
+		br
 		if success_messages && success_messages.length > 0
 			p= success_messages
 		if error_messages && error_messages.length > 0
@@ -18,6 +18,8 @@ html
 			<a href="/oauth/facebook">Login with Facebook</a>
 			<br>
 			<a href="/oauth/google">Login with Google</a>
-			<br>
+			br
 		else
+			a(href="/add")|add a note
+			br
 			a(href="/logout")| logout
