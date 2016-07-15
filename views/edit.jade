@@ -1,16 +1,24 @@
 doctype html
 html
 	head
-		title edit
+		title link config
 	body
-		form(action="/edit",method="post")
+		if success_messages && success_messages.length > 0
+			p= success_messages
+		if error_messages && error_messages.length > 0
+			p= error_messages
+		form(action="/edit/#{note.link}",method="post")
 			label(for='userEmail') userEmail
-				input(id='userEmail',type='text',value='',name='userEmail')
+				input(id='userEmail',type='text',value='#{note.userEmail}',name='userEmail')
 				<br>
 			label(for='detail') detail
-				textarea(id='detail',value='',name='detail')
+				textarea(id='detail',name='detail')|#{note.detail}
 				<br>
 			label(for='link') link > 7 digit
-				input(id='link',type='text',value='',name='link')
+				input(id='link',type='text',value='#{note.link}',name='link')
 				<br>
 			input(type='submit',value='submit',data-transition='fade', data-theme='c')
+			br
+			a(href="/#{note.link}")| return to the note
+			br
+			
