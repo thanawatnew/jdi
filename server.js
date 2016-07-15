@@ -104,15 +104,17 @@ router.get("/login",function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
 	//res.sendFile(__dirname + '/views'+'/login.html');
 	//console.log(req.user);
-	console.log(req);
-	res.render('login', { message: req.flash() ,user : req.user});
+	console.log(req.user);
+	console.log(res.locals.user);
+	res.render('login', { message: req.flash()});
 });
 
 router.get("/logout",function(req,res){
 	req.logout();
     req.session.destroy();
-	req.flash('success_messages', 'logged out successfully');
+	//req.flash('success_messages', 'logged out successfully');
     res.redirect('/');
+	//res.render('login', { message: 'logged out successfully'});
 });
 router.route("/add")
 	.get(function(req,res){
@@ -126,7 +128,7 @@ router.route("/add")
 		var newNote = new Note({
 			link : tempNote.link,
 			detail : tempNote.detail,
-			userEmail : tempNote.userEmail
+			email : tempNote.email
 		});
 		
 		// Setup stuff
@@ -205,7 +207,6 @@ router.get("/edit/:link",function(req,res){
 				if (err) return console.error(err);
 				console.log(data);
 			});
-			console.log('test');
 			req.flash('success_messages', 'Your note was updated');
 			res.redirect('/edit/'+req.body.link);
 			//res.render('link', { message: req.flash(), note:obj } );
