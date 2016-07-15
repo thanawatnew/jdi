@@ -9,9 +9,15 @@ html
 			p= error_messages
 		form(action="/add",method="post")
 			label(for='detail') detail
-				textarea(id='detail',value='#{detail}',name='detail')
+				if detail && typeof(detail) !== 'undefined' && detail.length>0
+					textarea(id='detail',value='#{detail}',name='detail')
+				else
+					textarea(id='detail',value='',name='detail')
 				<br>
 			label(for='link') link > 7 digit(optional)
-				input(id='link',type='text',value='#{link}',name='link')
+				if link && typeof(link) !== 'undefined' && link.length>0
+					input(id='link',type='text',value='#{link}',name='link')
+				else
+					input(id='link',type='text',value='',name='link')
 				<br>
 			input(type='submit',value='submit',data-transition='fade', data-theme='c')
