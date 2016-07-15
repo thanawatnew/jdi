@@ -7,6 +7,6 @@ html
 			p= success_messages
 		if error_messages && error_messages.length > 0
 			p= error_messages
-		p| #{note.userEmail}<br>
+		p| #{note.email}<br>
 		p| detail: #{note.detail}<br>
 		p| updated: #{note.updatedAt}
