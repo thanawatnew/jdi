@@ -8,8 +8,8 @@ html
 		if error_messages && error_messages.length > 0
 			p= error_messages
 		form(action="/edit/#{note.link}",method="post")
-			label(for='userEmail') userEmail
-				input(id='userEmail',type='text',value='#{note.userEmail}',name='userEmail')
+			label(for='email') email
+				input(id='email',type='text',value='#{note.email}',name='email')
 				<br>
 			label(for='detail') detail
 				textarea(id='detail',name='detail')|#{note.detail}
