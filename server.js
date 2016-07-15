@@ -118,15 +118,15 @@ router.get("/login",function(req,res){
 router.get("/logout",function(req,res){
 	req.logout();
     req.session.destroy();
-	//req.flash('success_messages', 'logged out successfully');
-    res.redirect('/');
+	//req.flash('success_messages', 'message: logged out successfully');
+    res.redirect('/login');
 	//res.render('login', { message: 'logged out successfully'});
 });
 router.route("/add")
 	.get(function(req,res){
 		if(!req.user){
-			req.flash('error_messages', 'please login to add a note');
-			res.redirect('/');
+			req.flash('error_messages', 'message: please login to add a note');
+			res.redirect('/login');
 		}
 		else
 			res.render('add', { message: req.flash() } );
@@ -176,7 +176,7 @@ router.route("/add")
 					}
 					else{
 						//res.send('note already existed!');
-						req.flash('error_messages', "Woops, looks like the random link name doesn't work, please submit again");
+						req.flash('error_messages', "message: Woops, looks like the random link name doesn't work, please submit again");
 						//continue;
 						//res.redirect('/add');
 						res.render('add', { message: req.flash(), detail: tempNote.detail } );
@@ -192,7 +192,7 @@ router.route("/add")
 		//res.send(noteOp.note.insert(req));
 	});
 
-router.get("/edit/:link",function(req,res){
+router.route("/edit/:link").get(function(req,res){
 	//res.send('Welcome to jdi - Online text pasting system using Node.js');
 	Note.findOne(
             {
@@ -203,14 +203,20 @@ router.get("/edit/:link",function(req,res){
 				if(obj)
 				{
 					console.log(obj);
-					res.render('edit', { message: req.flash(), note: obj } );
+					if(req.user && obj.email == req.user.email)
+						res.render('edit', { message: req.flash(), note: obj } );
+					else
+					{
+						req.flash('error_messages', "message: Woops, looks like you can't edit that note.");
+						res.redirect('/login');
+					}
 					//res.send(obj);
 					//console.log(obj);
 				}
 				else
 				{
-					req.flash('error_messages', 'Woops, looks like that note doesn\'t exist.');
-					res.redirect('/');
+					req.flash('error_messages', 'message: Woops, looks like that note doesn\'t exist.');
+					res.redirect('/login');
 					//res.send("note not found");
 				}
                 
@@ -218,18 +224,78 @@ router.get("/edit/:link",function(req,res){
         );
 	
 	})
-	.post("/edit/:link",function(req,res){
-			var conditions = { link: req.params.link };
-			var update = { $set: { link: req.body.link, detail: req.body.detail }};
-			var options = { upsert: true, 'new': true };
-
-			Note.update(conditions, update, options, function (err, data) {// callback
-				if (err) return console.error(err);
-				console.log(data);
-			});
-			req.flash('success_messages', 'Your note was updated');
-			res.redirect('/edit/'+req.body.link);
-			//res.render('link', { message: req.flash(), note:obj } );
+	.post(function(req,res){
+			if(req.user)
+			{
+				var linkToChangeInto = req.body.link;
+				var linkToBeChanged = req.param.link;
+				console.log('linkToChangeInto.length = ');
+				console.log(linkToChangeInto.length);
+				console.log(linkToChangeInto.length<7);
+				if(linkToChangeInto.length<7)
+				{
+					req.flash('error_messages', "message: link need to have more than 6 characters, so note wasn't updated");
+					res.render('edit',{note:{detail:req.body.detail,link:req.body.link},message:"message: link need to have more than 6 characters, so note wasn't updated"});
+					//res.redirect('/edit/'+linkToBeChanged);
+				}
+				else
+				{
+					
+					var conditions = { "$or":[{link: linkToBeChanged}, {email: req.user.email}] };
+					var update = { "$set": { link: linkToChangeInto, detail: req.body.detail}};
+					var options = { upsert: false};
+					
+					/*
+					Note.update(conditions, update, options, function (err, data) {// callback
+						console.log(data);
+						if (err) 
+						{
+							req.flash('error_messages', "message: error occurred, so note wasn't updated");
+							res.render('edit',{note:{detail:req.body.detail,link:req.body.link}});
+							//return console.error(err);
+							//res.redirect('/edit/'+linkToBeChanged);
+						}
+						else
+						{	
+							req.flash('success_messages', 'message: Your note was updated');
+							//res.render('edit',{note:{detail:req.body.detail,link:req.body.link}});
+							res.redirect('/'+linkToChangeInto);
+						}
+					});
+					//*/
+					console.log('conditions:');
+					console.log(conditions);
+					console.log('update:');
+					console.log(update);
+					Note.findOneAndUpdate(conditions, update, { new: true }, function(err, doc) {
+						if (err) 
+						{
+							console.log("message: error occurred, so note wasn't updated");
+							console.log(err);
+							req.flash('error_messages', "message: error occurred, so note wasn't updated");
+							res.render('edit',{note:{detail:req.body.detail,link:req.body.link}});
+							//return console.error(err);
+							//res.redirect('/edit/'+linkToBeChanged);
+						}
+						else
+						{	
+							req.flash('success_messages', 'message: Your note was updated');
+							res.render('edit',{note:{detail:req.body.detail,link:req.body.link}});
+							//res.redirect('/login');
+						}
+					});
+				}
+				
+				//res.render('link', { message: req.flash(), note:obj } );
+			}
+			else{
+				console.log("'message: please login before edit a note");
+				req.flash('error_messages', 'message: please login before edit a note');
+				res.redirect('/login');
+				//res.render('edit',{note:{detail:req.body.detail,link:req.body.link}});
+			}			
+			
+			
 		});
 
 app.use('/',router);
@@ -249,8 +315,8 @@ app.get('/:link', function(req, res) {
 				}
 				else
 				{
-					req.flash('error_messages', 'Woops, looks like that note doesn\'t exist.');
-					res.redirect('/');
+					req.flash('error_messages', 'message: Woops, looks like that note doesn\'t exist.');
+					res.redirect('/login');
 					//res.send("note not found");
 				}
                 
