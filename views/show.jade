@@ -10,3 +10,6 @@ html
 		p| #{note.email}<br>
 		p| detail: #{note.detail}<br>
 		p| updated: #{note.updatedAt}
+		if user && user.email==note.email
+				br
+				a(href="/edit/#{note.link}")| Click here to edit
