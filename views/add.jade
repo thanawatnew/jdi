@@ -1,16 +1,17 @@
 doctype html
 html
 	head
-		title edit
+		title add
 	body
-		form(action="/edit",method="post")
-			label(for='email') email
-				input(id='email',type='text',value='',name='email')
-				<br>
+		if success_messages && success_messages.length > 0
+			p= success_messages
+		if error_messages && error_messages.length > 0
+			p= error_messages
+		form(action="/add",method="post")
 			label(for='detail') detail
-				textarea(id='detail',value='',name='detail')
+				textarea(id='detail',value='#{detail}',name='detail')
 				<br>
-			label(for='link') link > 7 digit
-				input(id='link',type='text',value='',name='link')
+			label(for='link') link > 7 digit(optional)
+				input(id='link',type='text',value='#{link}',name='link')
 				<br>
 			input(type='submit',value='submit',data-transition='fade', data-theme='c')
