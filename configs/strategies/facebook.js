@@ -20,7 +20,7 @@ module.exports = function() {
         providerData.accessToken = accessToken;
         providerData.refreshToken = refreshToken;
 
-		console.log(profile);
+		//console.log(profile);
         var providerUserProfile = {
             name: profile.name.givenName,
             email: profile.emails[0].value,
@@ -49,6 +49,7 @@ saveOAuthUserProfile = function(req, profile, done) {
                     var possibleUsername = profile.username || ((profile.email) ? profile.email.split('@')[0] : '');
                     User.findUniqueUsername(possibleUsername, null, function(availableUsername) {
                         profile.username = availableUsername;
+						console.log(profile);
                         user = new User(profile);
 
                         user.save(function(err) {

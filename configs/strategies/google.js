@@ -37,7 +37,7 @@ module.exports = function() {
                     //newUser.google.id    = profile.id;
                     newUser.accessToken = token;
                     newUser.username  = profile.displayName;
-                    newUser.userEmail = profile.emails[0].value; // pull the first email
+                    newUser.email = profile.emails[0].value; // pull the first email
 
                     // save the user
                     newUser.save(function(err) {
