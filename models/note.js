@@ -12,7 +12,7 @@ var Schema =   mongoose.Schema;
 var noteSchema  = new Schema({
 "link" : String,
 "detail" : String,
-"userEmail" : String
+"email" : String
 },{timestamps:true});
 
 // create model if not exists.
